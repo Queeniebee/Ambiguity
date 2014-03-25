@@ -73,7 +73,10 @@ class BoxInt(BaseBox):
 '''
 
 from rply import ParserGenerator, LexerGenerator
-from rply.token import BaseBox
+
+# from rply.token import BaseBox 
+# removed BaseBox because language deals with strings
+# and not using RPython
 
 lexgen = LexerGenerator()
 
@@ -117,7 +120,7 @@ def expr_op(p):
     else:
         raise AssertionError("This is impossible, abort the time machine!")
 
-@pg.production("expr : NUMBER")
+@pg.production("expr : WHO")
 def expr_num(p):
     return BoxInt(int(p[0].getstr()))
 
