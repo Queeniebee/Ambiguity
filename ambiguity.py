@@ -80,10 +80,59 @@ lexgen = LexerGenerator()
 lexgen.add('AND', r"(and)")
 lexgen.add('WITHOUT', r"(without)")
 lexgen.add('DIVIDE', r"(divide)")
-lexgen.add('MULTIPLY', )
+lexgen.add('MULTIPLY', r"(multiply)")
+lexgen.add("NOT", r"(not)")
+lexgen.add("IF", r"(if)")
+lexgen.add("ELSE", r"(else)")
+lexgen.add("CHOOSE", r"(choose)")
+lexgen.add("COMMENT", r"(?#[a-zA-Z_][a-zA-Z0-9_]*)")
+lexgen.add("WHO", r"[a-zA-Z_][a-zA-Z0-9_]*")
 
 
+'''
+lexgen.add("WHO", r"[a-zA-Z_][a-zA-Z0-9_]*")
+lexgen.add("WHAT", r"[a-zA-Z_][a-zA-Z0-9_]*")
+lexgen.add("WHY", r"[a-zA-Z_][a-zA-Z0-9_]*")
+lexgen.add("HOW", r"[a-zA-Z_][a-zA-Z0-9_]*")
+lexgen.add("DEF", )
+'''
 
+
+pg = ParserGenerator(["WHO", "AND", "WITHOUT"],
+        precedence=[("left", ['AND', 'WITHOUT'])], cache_id="myparser")
+
+@pg.production("main : expr")
+def main(p):
+    return p[0]
+
+@pg.production("expr : expr AND expr")
+@pg.production("expr : expr WITHOUT expr")
+def expr_op(p):
+    leftside = p[0].getint()
+    rightside = p[2].getint()
+    if p[1].gettokentype() == "PLUS":
+        return BoxInt(leftside + rightside)
+    elif p[1].gettokentype() == "MINUS":
+        return BoxInt(leftside - rightside)
+    else:
+        raise AssertionError("This is impossible, abort the time machine!")
+
+@pg.production("expr : NUMBER")
+def expr_num(p):
+    return BoxInt(int(p[0].getstr()))
+
+
+lexer = lexgen.build()
+parser = pg.build()
+
+class BoxInt(BaseBox):
+    def __init__(self, value):
+        self.value = value
+
+    def getint(self):
+        return self.value
+
+'''
 keywords = {
         "return": Keyword("RETURN", "RETURN", EXPR_MID),
         "if": Keyword("IF", "IF_MOD", EXPR_BEG),
@@ -121,6 +170,5 @@ keywords = {
         "next": Keyword("NEXT", "NEXT", EXPR_MID),
         "break": Keyword("BREAK", "BREAK", EXPR_MID),
     }
+'''
 
-pg = ParserGenerator(["PERSON", "AND", "WITHOUT"],
-        precedence=[("left", ['AND', 'WITHOUT'])], cache_id="myparser")
