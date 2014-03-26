@@ -82,8 +82,8 @@ lexgen = LexerGenerator()
 
 lexgen.add('AND', r"(and)")
 lexgen.add('WITHOUT', r"(without)")
-lexgen.add('DIVIDE', r"(divide)")
 lexgen.add('MULTIPLY', r"(multiply)")
+lexgen.add('DIVIDE', r"(divide)")
 lexgen.add("NOT", r"(not)")
 lexgen.add("IF", r"(if)")
 lexgen.add("ELSE", r"(else)")
@@ -101,22 +101,40 @@ lexgen.add("DEF", )
 '''
 
 
-pg = ParserGenerator(["WHO", "AND", "WITHOUT"],
-        precedence=[("left", ['AND', 'WITHOUT'])], cache_id="myparser")
+pg = ParserGenerator(["WHO", "AND", "WITHOUT", "MULTIPLY", "DIVIDE"],
+    precedence = [
+		("left", ['AND', 'WITHOUT']),
+		("left", ["MULTIPLY","DIVIDE"]),
+		
+	], cache_id="myparser")
 
-@pg.production("main : expr")
+
+@pg.production('expression : expression PLUS expression')
+@pg.production('expression : expression MINUS expression')
+@pg.production('expression : expression MUL expression')
+@pg.production('expression : expression DIV expression')
+
+def expression_person(p):
+    # p is a list of the pieces matched by the right hand side of the
+    # rule
+    return Person(value_array[random.randrange(0, 10)])
+
+
+@pg.production("main : expression")
 def main(p):
     return p[0]
 
 @pg.production("expr : expr AND expr")
 @pg.production("expr : expr WITHOUT expr")
 def expr_op(p):
-    leftside = p[0].getint()
-    rightside = p[2].getint()
-    if p[1].gettokentype() == "PLUS":
+    leftside = p[0]
+    rightside = p[2]
+    if p[1].gettokentype() == "AND":
         return BoxInt(leftside + rightside)
-    elif p[1].gettokentype() == "MINUS":
+    elif p[1].gettokentype() == "WITHOUT":
         return BoxInt(leftside - rightside)
+	elif p[1].gettokentype() == "MULTIPLY":
+		return Mul(leftside, rightside)
     else:
         raise AssertionError("This is impossible, abort the time machine!")
 
@@ -128,12 +146,12 @@ def expr_num(p):
 lexer = lexgen.build()
 parser = pg.build()
 
-class BoxInt(BaseBox):
-    def __init__(self, value):
-        self.value = value
-
-    def getint(self):
-        return self.value
+# class BoxInt(BaseBox):
+#     def __init__(self, value):
+#         self.value = value
+# 
+#     def getint(self):
+#         return self.value
 
 '''
 keywords = {
