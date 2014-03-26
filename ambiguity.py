@@ -88,8 +88,11 @@ lexgen.add("NOT", r"(not)")
 lexgen.add("IF", r"(if)")
 lexgen.add("ELSE", r"(else)")
 lexgen.add("CHOOSE", r"(choose)")
-lexgen.add("COMMENT", r"(?#[a-zA-Z_][a-zA-Z0-9_]*)")
-lexgen.add("WHO", r"[a-zA-Z_][a-zA-Z0-9_]*")
+lexgen.add("WHO", r"[^ ]")
+lexgen.add("WHO", r"[^ ]")
+
+# lexgen.add("COMMENT", r"(?#[a-zA-Z_][a-zA-Z0-9_]*)")
+# lexgen.add("WHO", r"[a-zA-Z_][a-zA-Z0-9_]*")
 
 
 '''
